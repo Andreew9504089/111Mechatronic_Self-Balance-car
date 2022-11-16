@@ -10,7 +10,7 @@ MPU6050 mpu(Wire);
 unsigned long timer = 0;
 
 void setup() {
-  Serial.begin(115200);                           // Ensure serial monitor set to this value also    
+  Serial.begin(19200);                           // Ensure serial monitor set to this value also    
                        
   Wire.begin();
   mpu.begin();

@@ -23,7 +23,7 @@ Quaternion q;           // [w, x, y, z] // (方位,运动)变量
 VectorFloat gravity;    // [x, y, z] //重力矢量
 float ypr[3];           //yaw/pitch/roll（偏航/俯仰/滚动）数组
 
-const int L298N_IN1 = 7;
+const int L298N_IN1 = 7;         
 const int L298N_IN2 = 3;
 const int L298N_IN3 = 6;
 const int L298N_IN4 = 5;
@@ -31,11 +31,11 @@ const int L298N_ENA = 11;
 const int L298N_ENB = 10;
 
 /*********Tune these 4 values for your BOT*********/
-double setpoint= 182; //平衡车垂直于地面时的值（目标值）,從序列監控取得小車在直立平衡狀況下的值
+double setpoint= 175 ; //平衡车垂直于地面时的值（目标值）,從序列監控取得小車在直立平衡狀況下的值
 //(依照P->D->I順序調參)
-double Kp = 20; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
-double Kd = 0.8; //2.调积分(消抖,給的過大會震盪)
-double Ki = 140; //3.调微分(調節快速平衡)
+double Kp = 100; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
+double Ki = 0.05; //2.调积分(消抖,給的過大會震盪)
+double Kd = 1.2; //3.调微分(調節快速平衡)
 
 /******End of values setting*********/
 
@@ -66,9 +66,9 @@ void Reverse() //電機後退
   digitalWrite(L298N_IN2, LOW);
   digitalWrite(L298N_IN3, LOW);
   digitalWrite(L298N_IN4, HIGH);
-  analogWrite(L298N_ENA, output);
-  analogWrite(L298N_ENB, output); 
-  Serial.print("R");
+  analogWrite(L298N_ENA, -output);
+  analogWrite(L298N_ENB, -output); 
+  //Serial.print("R");
 }
 
 void Stop() //電機停止
@@ -79,19 +79,19 @@ void Stop() //電機停止
   digitalWrite(L298N_IN4, LOW);
   analogWrite(L298N_ENA, LOW);
   analogWrite(L298N_ENB, LOW);  
-  Serial.print("S");
+  //Serial.print("S");
 }
 
 void setup() {
   Serial.begin(115200);
 
   // initialize device
-    Serial.println(F("Initializing I2C devices..."));
+    //Serial.println(F("Initializing I2C devices..."));
     mpu.initialize();
 
      // verify connection
-    Serial.println(F("Testing device connections..."));
-    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+    //Serial.println(F("Testing device connections..."));
+    //Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
     // load and configure the DMP
     devStatus = mpu.dmpInitialize();
@@ -107,16 +107,16 @@ void setup() {
     if (devStatus == 0)
     {
         // turn on the DMP, now that it's ready
-        Serial.println(F("Enabling DMP..."));
+        //Serial.println(F("Enabling DMP..."));
         mpu.setDMPEnabled(true);
 
         // enable Arduino interrupt detection
-        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+        //Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
         attachInterrupt(0, dmpDataReady, RISING);
         mpuIntStatus = mpu.getIntStatus();
 
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
+        //Serial.println(F("DMP ready! Waiting for first interrupt..."));
         dmpReady = true;
 
         // get expected DMP packet size for later comparison
@@ -139,16 +139,18 @@ void setup() {
     }
 
 //初始化電機輸出引腳
-    pinMode (6, OUTPUT);
-    pinMode (9, OUTPUT);
-    pinMode (10, OUTPUT);
-    pinMode (11, OUTPUT);
+    pinMode (L298N_IN1, OUTPUT);
+    pinMode (L298N_IN2, OUTPUT);
+    pinMode (L298N_IN3, OUTPUT);
+    pinMode (L298N_IN4, OUTPUT);
+    pinMode (L298N_ENA, OUTPUT);
+    pinMode (L298N_ENB, OUTPUT);
 
 //默認情況下關閉電機
-    analogWrite(6,LOW);
-    analogWrite(9,LOW);
-    analogWrite(10,LOW);
-    analogWrite(11,LOW);
+    digitalWrite(L298N_IN1,LOW);
+    digitalWrite(L298N_IN2,LOW);
+    digitalWrite(L298N_IN3,LOW);
+    digitalWrite(L298N_IN4,LOW);
 }
 
 void loop() {
@@ -163,9 +165,9 @@ void loop() {
         pid.Compute();   
         
         //Print the value of Input and Output on serial monitor to check how it is working.
-        Serial.print(input); Serial.print(" =>"); Serial.println(output);
+        //Serial.print(input); Serial.print(" =>"); Serial.println(output);
                
-        if (input>150 && input<200){//If the Bot is falling 
+        if (input>140 && input<220){//If the Bot is falling 
           
         if (output>0) //Falling towards front 
         Forward(); //Rotate the wheels forward 
@@ -189,7 +191,7 @@ void loop() {
     {
        // 重置
         mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
+        //Serial.println(F("FIFO overflow!"));
 
     // 否则，检查DMP数据准备中断
     }
