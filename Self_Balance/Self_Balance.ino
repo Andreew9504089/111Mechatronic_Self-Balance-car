@@ -31,11 +31,11 @@ const int L298N_ENA = 11;
 const int L298N_ENB = 10;
 
 /*********Tune these 4 values for your BOT*********/
-double setpoint= 175 ; //平衡车垂直于地面时的值（目标值）,從序列監控取得小車在直立平衡狀況下的值
+double setpoint= 174 ; //平衡车垂直于地面时的值（目标值）,從序列監控取得小車在直立平衡狀況下的值
 //(依照P->D->I順序調參)
-double Kp = 100; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
-double Ki = 0.05; //2.调积分(消抖,給的過大會震盪)
-double Kd = 1.2; //3.调微分(調節快速平衡)
+double Kp = 70; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
+double Ki = 0.1; //2.调积分(消抖,給的過大會震盪)
+double Kd = 1.5; //3.调微分(調節快速平衡)
 
 /******End of values setting*********/
 
