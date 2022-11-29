@@ -50,7 +50,7 @@ void stall(){
 }
 
 void loop() {
-  int speed = 125;
+  int speed = 255;
   forward(speed);
   delay(5000);
   backward(speed);
