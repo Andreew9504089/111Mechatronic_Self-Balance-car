@@ -10,6 +10,7 @@ pygame.joystick.init()
 LOCKED = (200,100,100)
 UNLOCKED = (100,200,100)
 WIDTH,HEIGHT = 500,500
+transmit_freq = 100
 Done = False
 Lock = True
 print("Wait for Arduino BT to initialize...")
@@ -133,7 +134,7 @@ if __name__=='__main__':
             elif event.type == pygame.JOYAXISMOTION:
                 control.update()
 
-        if((time() - time_last) > 0.01):
+        if((time() - time_last) > (1/transmit_freq)):
             control.sendCommand()
             time_last = time()
 
