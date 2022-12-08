@@ -278,13 +278,13 @@ void loop() {
         control = output;
         if (input>120 && input<240 ){      //             
           if (control>0){
-            if(ctrl_LR > 0.1){
+            if(ctrl_LR > 0.1 && input > 160 && input < 200){
               speedFactor = 1 - ctrl_LR*LR_strength;
               Forward(1);
-            }else if(ctrl_LR < -0.1){
+            }else if(ctrl_LR < -0.1 && input > 160 && input < 200){
               speedFactor = 1 + ctrl_LR*LR_strength;
               Forward(2);
-            }else if(ctrl_UD != 0){
+            }else if(ctrl_UD != 0 && input > 160 && input < 200){
               Forward(0);
               s_in = 0;
               s_out = 0;
@@ -292,13 +292,13 @@ void loop() {
               Forward(0);
             }
           }else if (control<0){
-            if(ctrl_LR > 0.1){
+            if(ctrl_LR > 0.1  && input > 160 && input < 200){
               speedFactor = 1 - ctrl_LR*LR_strength;
               Reverse(1);
-            }else if(ctrl_LR < -0.1){
+            }else if(ctrl_LR < -0.1 && input > 160 && input < 200){
               speedFactor = 1 + ctrl_LR*LR_strength;
               Reverse(2);
-            }else if(ctrl_UD != 0){
+            }else if(ctrl_UD != 0 && input > 160 && input < 200){
               Reverse(0);
               s_in = 0;
               s_out = 0;
