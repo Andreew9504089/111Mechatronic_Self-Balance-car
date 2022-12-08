@@ -65,6 +65,9 @@ double s_sample_time = 50;
 
 double LR_strength = 0.5; // LR from -1 to 1
 double UD_strength = 0.5; // UD from -1 to 1
+
+int safety_upper = 200;
+int safety_lower = 160;
 /******End of values setting*********/
 
 double speedFactor = 1;
@@ -278,13 +281,13 @@ void loop() {
         control = output;
         if (input>120 && input<240 ){      //             
           if (control>0){
-            if(ctrl_LR > 0.1 && input > 160 && input < 200){
+            if(ctrl_LR > 0.1 && input > safety_lower && input < safety_upper){
               speedFactor = 1 - ctrl_LR*LR_strength;
               Forward(1);
-            }else if(ctrl_LR < -0.1 && input > 160 && input < 200){
+            }else if(ctrl_LR < -0.1 && input > safety_lower && input < safety_upper){
               speedFactor = 1 + ctrl_LR*LR_strength;
               Forward(2);
-            }else if(ctrl_UD != 0 && input > 160 && input < 200){
+            }else if(ctrl_UD != 0 && input > safety_lower && input < safety_upper){
               Forward(0);
               s_in = 0;
               s_out = 0;
@@ -292,13 +295,13 @@ void loop() {
               Forward(0);
             }
           }else if (control<0){
-            if(ctrl_LR > 0.1  && input > 160 && input < 200){
+            if(ctrl_LR > 0.1  && input > safety_lower && input < safety_upper){
               speedFactor = 1 - ctrl_LR*LR_strength;
               Reverse(1);
-            }else if(ctrl_LR < -0.1 && input > 160 && input < 200){
+            }else if(ctrl_LR < -0.1 && input > safety_lower && input < safety_upper){
               speedFactor = 1 + ctrl_LR*LR_strength;
               Reverse(2);
-            }else if(ctrl_UD != 0 && input > 160 && input < 200){
+            }else if(ctrl_UD != 0 && input >safety_lower && input < safety_upper){
               Reverse(0);
               s_in = 0;
               s_out = 0;
