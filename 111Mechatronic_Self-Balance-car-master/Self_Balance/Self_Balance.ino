@@ -63,11 +63,11 @@ double sUpper = 3;
 double sLower = -3;
 double s_sample_time = 50;
 
-double LR_strength = 0.5; // LR from -1 to 1
-double UD_strength = 0.5; // UD from -1 to 1
+double LR_strength = 0.4; // LR from -1 to 1
+double UD_strength = 5; // UD from -1 to 1
 
-int safety_upper = 200;
-int safety_lower = 160;
+int safety_upper = 185;
+int safety_lower = 175;
 /******End of values setting*********/
 
 double speedFactor = 1;
@@ -144,15 +144,15 @@ void Reverse(int turn) //電機後退
     digitalWrite(L298N_IN2, LOW);
     digitalWrite(L298N_IN3, LOW);
     digitalWrite(L298N_IN4, HIGH);
-    analogWrite(L298N_ENA, -control*speedFactor);
-    analogWrite(L298N_ENB, -control); 
+    analogWrite(L298N_ENA, -control);
+    analogWrite(L298N_ENB, -control*speedFactor); 
     //Serial.print("RL");
   }else if(turn == 2){
     digitalWrite(L298N_IN1, HIGH);
     digitalWrite(L298N_IN2, LOW);
     digitalWrite(L298N_IN3, LOW);
-    digitalWrite(L298N_IN4, HIGH*speedFactor);
-    analogWrite(L298N_ENA, -control);
+    digitalWrite(L298N_IN4, HIGH);
+    analogWrite(L298N_ENA, -control*speedFactor);
     analogWrite(L298N_ENB, -control); 
     //Serial.print("RR");
   }
@@ -257,7 +257,6 @@ void loop() {
 
       if ((mpuIntStatus & 0x10) || fifoCount == 1024){
           mpu.resetFIFO();
-          digitalWrite(LED_BUILTIN, HIGH);
       }else if (mpuIntStatus & 0x02){
         while (fifoCount >= packetSize){
           mpu.getFIFOBytes(fifoBuffer, packetSize);
@@ -292,6 +291,7 @@ void loop() {
               s_in = 0;
               s_out = 0;
             }else{
+              digitalWrite(LED_BUILTIN, HIGH);
               Forward(0);
             }
           }else if (control<0){
