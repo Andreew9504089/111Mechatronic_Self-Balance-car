@@ -14,7 +14,7 @@ transmit_freq = 100
 Done = False
 Lock = True
 print("Wait for Arduino BT to initialize...")
-arduino = txfer.SerialTransfer('COM7') 
+arduino = txfer.SerialTransfer('COM13') 
 arduino.close()
 arduino.open()
 sleep(2)

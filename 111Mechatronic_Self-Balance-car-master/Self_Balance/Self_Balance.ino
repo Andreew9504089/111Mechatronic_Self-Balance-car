@@ -48,9 +48,9 @@ const int L298N_ENB = 5;
 double manualpoint= 180; //平衡车垂直于地面时的值（目标值）,從序列監控取得小車在直立平衡狀況下的值
 double setpoint = manualpoint;
 //(依照P->D->I順序調參)
-double Kp = 2; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
-double Ki = 0.05; //2.调积分(消抖,給的過大會震盪)
-double Kd = 1.2; //3.调微分(調節快速平衡)
+double Kp = 30; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
+double Ki = 300; //2.调积分(消抖,給的過大會震盪)
+double Kd = 1.7; //3.调微分(調節快速平衡)
 double upper = 255;
 double lower = -255;
 double sample_time = 5;
@@ -58,16 +58,16 @@ double sample_time = 5;
 double set_dir = 0;
 double sKp = 12;
 double sKd = 0;
-double sKi = 1;
-double sUpper = 3;
+double sKi = 200;
+double sUpper = 3; 
 double sLower = -3;
 double s_sample_time = 50;
 
-double LR_strength = 0.5; // LR from -1 to 1
-double UD_strength = 0.5; // UD from -1 to 1
+double LR_strength = 0.4; // LR from -1 to 1
+double UD_strength = 5; // UD from -1 to 1
 
-int safety_upper = 200;
-int safety_lower = 160;
+int safety_upper = 185;
+int safety_lower = 175;
 /******End of values setting*********/
 
 double speedFactor = 1;
@@ -104,7 +104,7 @@ void Forward(int turn) //電機前進
     analogWrite(L298N_ENB, control); 
     //Serial.print("F");                                //Debugging information 
     if(s_in > -1){
-      s_in -= 0.01;
+      s_in -= 0.02;
     }
   }else if(turn == 1){                                // turn right
     digitalWrite(L298N_IN1, LOW);
@@ -137,22 +137,22 @@ void Reverse(int turn) //電機後退
     analogWrite(L298N_ENB, -control); 
     //Serial.print("R");
     if(s_in < 1){
-      s_in += 0.01;
+      s_in += 0.02;
     }
   }else if(turn == 1){
     digitalWrite(L298N_IN1, HIGH);
     digitalWrite(L298N_IN2, LOW);
     digitalWrite(L298N_IN3, LOW);
     digitalWrite(L298N_IN4, HIGH);
-    analogWrite(L298N_ENA, -control*speedFactor);
-    analogWrite(L298N_ENB, -control); 
+    analogWrite(L298N_ENA, -control);
+    analogWrite(L298N_ENB, -control*speedFactor); 
     //Serial.print("RL");
   }else if(turn == 2){
     digitalWrite(L298N_IN1, HIGH);
     digitalWrite(L298N_IN2, LOW);
     digitalWrite(L298N_IN3, LOW);
-    digitalWrite(L298N_IN4, HIGH*speedFactor);
-    analogWrite(L298N_ENA, -control);
+    digitalWrite(L298N_IN4, HIGH);
+    analogWrite(L298N_ENA, -control*speedFactor);
     analogWrite(L298N_ENB, -control); 
     //Serial.print("RR");
   }
@@ -257,7 +257,6 @@ void loop() {
 
       if ((mpuIntStatus & 0x10) || fifoCount == 1024){
           mpu.resetFIFO();
-          digitalWrite(LED_BUILTIN, HIGH);
       }else if (mpuIntStatus & 0x02){
         while (fifoCount >= packetSize){
           mpu.getFIFOBytes(fifoBuffer, packetSize);
@@ -292,6 +291,7 @@ void loop() {
               s_in = 0;
               s_out = 0;
             }else{
+              digitalWrite(LED_BUILTIN, HIGH);
               Forward(0);
             }
           }else if (control<0){
