@@ -48,9 +48,9 @@ const int L298N_ENB = 5;
 double manualpoint= 180; //平衡车垂直于地面时的值（目标值）,從序列監控取得小車在直立平衡狀況下的值
 double setpoint = manualpoint;
 //(依照P->D->I順序調參)
-double Kp = 2; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
-double Ki = 0.05; //2.调积分(消抖,給的過大會震盪)
-double Kd = 1.2; //3.调微分(調節快速平衡)
+double Kp = 30; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
+double Ki = 300; //2.调积分(消抖,給的過大會震盪)
+double Kd = 1.7; //3.调微分(調節快速平衡)
 double upper = 255;
 double lower = -255;
 double sample_time = 5;
@@ -58,8 +58,8 @@ double sample_time = 5;
 double set_dir = 0;
 double sKp = 12;
 double sKd = 0;
-double sKi = 1;
-double sUpper = 3;
+double sKi = 200;
+double sUpper = 3; 
 double sLower = -3;
 double s_sample_time = 50;
 
@@ -104,7 +104,7 @@ void Forward(int turn) //電機前進
     analogWrite(L298N_ENB, control); 
     //Serial.print("F");                                //Debugging information 
     if(s_in > -1){
-      s_in -= 0.01;
+      s_in -= 0.02;
     }
   }else if(turn == 1){                                // turn right
     digitalWrite(L298N_IN1, LOW);
@@ -137,7 +137,7 @@ void Reverse(int turn) //電機後退
     analogWrite(L298N_ENB, -control); 
     //Serial.print("R");
     if(s_in < 1){
-      s_in += 0.01;
+      s_in += 0.02;
     }
   }else if(turn == 1){
     digitalWrite(L298N_IN1, HIGH);
