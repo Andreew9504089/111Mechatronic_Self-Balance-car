@@ -43,16 +43,18 @@ const int L298N_IN3 = 13;
 const int L298N_IN4 = 12;
 const int L298N_ENA = 6;
 const int L298N_ENB = 5;
+const int infrared_L = 8;
+const int infrared_R = 9;
 
 /*********Tune these 4 values for your BOT*********/
 double manualpoint= 180; //平衡车垂直于地面时的值（目标值）,從序列監控取得小車在直立平衡狀況下的值
 double setpoint = manualpoint;
 //(依照P->D->I順序調參)
-double Kp = 30; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
-double Ki = 300; //2.调积分(消抖,給的過大會震盪)
-double Kd = 1.7; //3.调微分(調節快速平衡)
-double upper = 255;
-double lower = -255;
+double Kp = 40; //1.设置偏差比例系数(調節施予外力的直立,給的過大會震盪)
+double Ki = 400; //2.调积分(消抖,給的過大會震盪)
+double Kd = 2.0; //3.调微分(調節快速平衡)
+double upper = 220;
+double lower = -220;
 double sample_time = 5;
 
 double set_dir = 0;
@@ -66,8 +68,8 @@ double s_sample_time = 50;
 double LR_strength = 0.4; // LR from -1 to 1
 double UD_strength = 5; // UD from -1 to 1
 
-int safety_upper = 185;
-int safety_lower = 175;
+int safety_upper = 188;
+int safety_lower = 172;
 /******End of values setting*********/
 
 double speedFactor = 1;
@@ -111,16 +113,16 @@ void Forward(int turn) //電機前進
     digitalWrite(L298N_IN2, HIGH);
     digitalWrite(L298N_IN3, HIGH);
     digitalWrite(L298N_IN4, LOW);
-    analogWrite(L298N_ENA, control*speedFactor);
-    analogWrite(L298N_ENB, control); 
+    analogWrite(L298N_ENA, control);
+    analogWrite(L298N_ENB, control*speedFactor); 
     //Serial.print("FR");                               //Debugging information 
   }else if(turn == 2){
     digitalWrite(L298N_IN1, LOW);
     digitalWrite(L298N_IN2, HIGH);
     digitalWrite(L298N_IN3, HIGH);
     digitalWrite(L298N_IN4, LOW);
-    analogWrite(L298N_ENA, control);
-    analogWrite(L298N_ENB, control*speedFactor); 
+    analogWrite(L298N_ENA, control*speedFactor);
+    analogWrite(L298N_ENB, control); 
     //Serial.print("FL"); 
   }
 
@@ -128,7 +130,7 @@ void Forward(int turn) //電機前進
 
 void Reverse(int turn) //電機後退
 {
-  if(turn == 0){ ////for straight
+  if(turn == 0){
     digitalWrite(L298N_IN1, HIGH);
     digitalWrite(L298N_IN2, LOW);
     digitalWrite(L298N_IN3, LOW);
@@ -139,20 +141,20 @@ void Reverse(int turn) //電機後退
     if(s_in < 1){
       s_in += 0.02;
     }
-  }else if(turn == 1){ ////for left
-    digitalWrite(L298N_IN1, HIGH);
-    digitalWrite(L298N_IN2, LOW);
+  }else if(turn == 1){
+    digitalWrite(L298N_IN1, LOW);
+    digitalWrite(L298N_IN2, HIGH);
     digitalWrite(L298N_IN3, LOW);
     digitalWrite(L298N_IN4, HIGH);
     analogWrite(L298N_ENA, -control);
-    analogWrite(L298N_ENB, -control*speedFactor); 
+    analogWrite(L298N_ENB, -control); 
     //Serial.print("RL");
-  }else if(turn == 2){ ////for right
+  }else if(turn == 2){
     digitalWrite(L298N_IN1, HIGH);
     digitalWrite(L298N_IN2, LOW);
-    digitalWrite(L298N_IN3, LOW);
-    digitalWrite(L298N_IN4, HIGH);
-    analogWrite(L298N_ENA, -control*speedFactor);
+    digitalWrite(L298N_IN3, HIGH);
+    digitalWrite(L298N_IN4, LOW);
+    analogWrite(L298N_ENA, -control);
     analogWrite(L298N_ENB, -control); 
     //Serial.print("RR");
   }
@@ -235,6 +237,11 @@ void setup() {
   digitalWrite(L298N_IN2,LOW);
   digitalWrite(L298N_IN3,LOW);
   digitalWrite(L298N_IN4,LOW);
+
+// infrared
+pinMode (infrared_L, INPUT);
+pinMode (infrared_R, INPUT);
+Serial.begin(9600);
 }
 
 void loop() {
@@ -276,32 +283,38 @@ void loop() {
         spid.Compute();                             //setpoint PID
 
         // no data from python -> perform standby balancing
-        setpoint = s_out + manualpoint + ctrl_UD*UD_strength;
+        setpoint = s_out + manualpoint + 1;
         control = output;
         if (input>120 && input<240 ){      //             
-          if (control>0){
-            if(ctrl_LR > 0.1 && input > safety_lower && input < safety_upper){
-              speedFactor = 1 - ctrl_LR*LR_strength;
+          if (control>0){/*
+            if((digitalRead(infrared_L) == 1 && digitalRead(infrared_R) == 0) && input > safety_lower && input < safety_upper){
+              speedFactor = 0.2;
               Forward(1);
-            }else if(ctrl_LR < -0.1 && input > safety_lower && input < safety_upper){
-              speedFactor = 1 + ctrl_LR*LR_strength;
+            }else if((digitalRead(infrared_L) == 0 && digitalRead(infrared_R) == 1) && input > safety_lower && input < safety_upper){
+              speedFactor = 0.2;
               Forward(2);
-            }else if(ctrl_UD != 0 && input > safety_lower && input < safety_upper){
+            }else if((digitalRead(infrared_L) == 0 && digitalRead(infrared_R) == 0) && input > safety_lower && input < safety_upper){
               Forward(0);
               s_in = 0;
               s_out = 0;
-            }else{
+            }else{*/
               digitalWrite(LED_BUILTIN, HIGH);
               Forward(0);
-            }
+            //}
           }else if (control<0){
-            if(ctrl_LR > 0.1  && input > safety_lower && input < safety_upper){
-              speedFactor = 1 - ctrl_LR*LR_strength;
+            if((digitalRead(infrared_L) == 1 && digitalRead(infrared_R) == 0)&& input > safety_lower && input < safety_upper){
+              speedFactor = 0.2;
+              Serial.println("R");
+              control = -200;
+              //delay(100);
               Reverse(1);
-            }else if(ctrl_LR < -0.1 && input > safety_lower && input < safety_upper){
-              speedFactor = 1 + ctrl_LR*LR_strength;
+            }else if((digitalRead(infrared_L) == 0 && digitalRead(infrared_R) == 1)&& input > safety_lower && input < safety_upper){
+              speedFactor = 0.2;
+              Serial.println("L");
+              control = -200;
+              //delay(100);
               Reverse(2);
-            }else if(ctrl_UD != 0 && input >safety_lower && input < safety_upper){
+            }else if((digitalRead(infrared_L) == 1 && digitalRead(infrared_R) == 1)&& input > safety_lower && input < safety_upper){
               Reverse(0);
               s_in = 0;
               s_out = 0;
@@ -311,8 +324,15 @@ void loop() {
           }                       
         }else{
           Stop();  
-        }                    
+        }                             
+                       
       }  
     }
   }
+  //(digitalRead(infrared_L) == 1 && digitalRead(infrared_R) == 0)
+  /*Serial.print("L: ");
+  Serial.print(digitalRead(infrared_L));
+  Serial.print(" R: ");
+  Serial.println(digitalRead(infrared_R));
+  */
 }
